@@ -2071,11 +2071,10 @@ app.get("/api/bootstrap", ensureSession, async (req, res) => {
   res.json(payload);
 });
 
-// Serve static files from the public folder (use __dirname which is derived above)
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(process.cwd(), 'public')));
 
 app.get("*", (_req, res) => {
-  res.sendFile(path.join(__dirname, 'public', "index.html"));
+  res.sendFile(path.join(process.cwd(), 'public', "index.html"));
 });
 
 async function connectDatabase() {
