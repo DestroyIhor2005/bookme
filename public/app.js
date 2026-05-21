@@ -153,7 +153,6 @@ const chatEditModalText = document.getElementById("chat-edit-modal-text");
 const chatEditModalInput = document.getElementById("chat-edit-modal-input");
 const chatEditSaveBtn = document.getElementById("chat-edit-save");
 const chatEditCancelBtn = document.getElementById("chat-edit-cancel");
-const bookingRejectReasonField = document.getElementById("booking-reject-reason");
 
 function autoExpandTextarea(textarea) {
   if (!textarea) {
@@ -171,7 +170,7 @@ function autoExpandTextarea(textarea) {
 }
 
 // Auto-expand textarea
-[chatInput, dashboardChatInput, chatEditModalInput, bookingRejectReasonField, contactMessage, document.getElementById("owner-property-description")].forEach((textarea) => {
+[chatInput, dashboardChatInput, chatEditModalInput, contactMessage, document.getElementById("owner-property-description")].forEach((textarea) => {
   if (!textarea) {
     return;
   }
@@ -958,6 +957,15 @@ function getStatusClass(status) {
 function getBookingStatusMeta(status) {
   const rawStatus = String(status || "").toLowerCase();
 
+  if (rawStatus === "rejected") {
+    return {
+      code: "completed",
+      filterLabel: "Відхилено",
+      cardLabel: "Відхилено",
+      className: "status-pill--booked"
+    };
+  }
+
   if (rawStatus === "new") {
     return {
       code: "new",
@@ -1064,7 +1072,7 @@ function canCancelBooking(booking) {
 
 function isArchivedBooking(booking) {
   const rawStatus = String(booking?.status || "").toLowerCase();
-  return rawStatus === "cancelled" || getBookingStatusMeta(booking?.status).code === "completed";
+  return rawStatus === "cancelled" || rawStatus === "rejected" || getBookingStatusMeta(booking?.status).code === "completed";
 }
 
 function getPaymentStatusMeta(status) {
@@ -1129,6 +1137,7 @@ function renderDashboardBookingCard(booking, { hostMode = false, archived = fals
       : "Моє бронювання";
   const title = hostMode ? booking.guest : booking.property;
   const subtitle = hostMode ? booking.property : booking.city;
+  const rejectionHtml = archived && booking.rejectionReason ? `<p class="booking-rejection">Причина відхилення: ${escapeHtml(booking.rejectionReason)}</p>` : "";
   const dateLabel = hostMode ? "Дати" : "Дати проживання";
   const amountLabel = hostMode ? "Сума" : "Вартість";
   const note = archived
@@ -1138,17 +1147,14 @@ function renderDashboardBookingCard(booking, { hostMode = false, archived = fals
       : "Статус і керування бронюванням доступні тут.";
 
   let actionButton = '<button class="secondary-btn booking-action-btn booking-details-btn" data-booking-id="' + booking.id + '" type="button">Деталі</button>';
-  if (!archived) {
-    if (hostMode) {
-      if (statusMeta.code === "new") {
-        actionButton += `<button class="primary-btn owner-action-btn" data-owner-booking-action="confirmed" data-owner-booking-id="${booking.id}" type="button">Підтвердити</button>`;
-        actionButton += `<button class="secondary-btn owner-action-btn" data-owner-booking-reject="${booking.id}" type="button">Відхилити</button>`;
-      } else if (statusMeta.code === "confirmed") {
-        actionButton += `<button class="secondary-btn owner-action-btn" data-owner-booking-action="completed" data-owner-booking-id="${booking.id}" type="button">Завершити</button>`;
-      }
-    } else if (canCancelBooking(booking)) {
-      actionButton += `<button class="secondary-btn owner-action-btn" data-cancel-booking-id="${booking.id}" type="button">Скасувати</button>`;
-    }
+      if (!archived && hostMode) {
+        if (statusMeta.code === "new") {
+          actionButton += `<button class="primary-btn owner-action-btn" data-owner-booking-action="confirmed" data-owner-booking-id="${booking.id}" type="button">Підтвердити</button>`;
+        } else if (statusMeta.code === "confirmed") {
+          actionButton += `<button class="secondary-btn owner-action-btn" data-owner-booking-action="completed" data-owner-booking-id="${booking.id}" type="button">Завершити</button>`;
+        }
+      } else if (!archived && canCancelBooking(booking)) {
+        actionButton += `<button class="secondary-btn owner-action-btn" data-cancel-booking-id="${booking.id}" type="button">Скасувати</button>`;
   }
 
   return `
@@ -1158,6 +1164,7 @@ function renderDashboardBookingCard(booking, { hostMode = false, archived = fals
           <span class="dashboard-booking-card__eyebrow">${eyebrow}</span>
           <h4>${title}</h4>
           <p>${subtitle}</p>
+          ${rejectionHtml}
           ${hostMode && booking.guestPhone ? `<p class="dashboard-booking-card__guest-phone">${booking.guestPhone}</p>` : ""}
         </div>
         <span class="status-pill ${statusMeta.className}">${statusMeta.cardLabel}</span>
@@ -2891,54 +2898,7 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  const rejectButton = event.target.closest("[data-owner-booking-reject]");
-  if (rejectButton) {
-    const bookingId = rejectButton.dataset.ownerBookingReject;
-    const modal = document.getElementById("booking-reject-modal");
-    const rejectReasonField = document.getElementById("booking-reject-reason");
-    const confirmBtn = document.getElementById("booking-reject-confirm");
-    const cancelBtn = document.getElementById("booking-reject-cancel");
-
-    if (!modal || !rejectReasonField || !confirmBtn || !cancelBtn) return;
-
-    if (!modal || !rejectReasonField || !confirmBtn || !cancelBtn) return;
-    rejectReasonField.value = "";
-    modal.classList.remove("hidden");
-    syncModalScrollLock();
-    rejectReasonField.focus();
-
-    const onConfirm = async () => {
-      const reason = rejectReasonField.value.trim();
-      if (!reason) {
-        showToast("Помилка", "Вкажіть причину відхилення.");
-        return;
-      }
-      try {
-        await apiRequest(`/api/owner/bookings/${encodeURIComponent(bookingId)}/status`, {
-          method: "PATCH",
-          body: JSON.stringify({ status: "rejected", rejectionReason: reason })
-        });
-        await refreshAppFromApi();
-        showToast("Успіх", "Бронювання відхилено.");
-        cleanup();
-      } catch (error) {
-        showToast("Помилка", error.message);
-      }
-    };
-
-    const onCancel = () => cleanup();
-
-    const cleanup = () => {
-      modal.classList.add("hidden");
-      syncModalScrollLock();
-      confirmBtn.removeEventListener("click", onConfirm);
-      cancelBtn.removeEventListener("click", onCancel);
-    };
-
-    confirmBtn.addEventListener("click", onConfirm);
-    cancelBtn.addEventListener("click", onCancel);
-    return;
-  }
+  // Reject flow removed: UI no longer exposes reject modal or handlers.
 
   const dashButton = event.target.closest("[data-dash-link]");
   if (dashButton) {

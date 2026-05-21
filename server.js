@@ -287,6 +287,10 @@ function normalizeBookingStatus(status) {
     return "cancelled";
   }
 
+  if (["rejected", "відхилено", "відмовлено", "відмовлено власником", "відмовлено господарем"].includes(rawStatus)) {
+    return "rejected";
+  }
+
   return "new";
 }
 
@@ -606,6 +610,9 @@ function normalizeBooking(booking, propertyMap = new Map(), userMap = new Map())
     // include guest phone when available (sanitized via sanitizeUser)
     guestPhone: user?.phone || "",
     guestPhoneIsForeign: Boolean(user?.isForeignPhone)
+    ,
+    // expose rejection reason for archived/rejected bookings
+    rejectionReason: String(booking.rejection_reason || "")
   };
 }
 
@@ -1331,6 +1338,13 @@ app.patch("/api/owner/bookings/:id/status", ensureSession, async (req, res) => {
 
   booking.status = nextStatus;
   booking.updated_at = new Date();
+  if (nextStatus === "rejected") {
+    booking.rejection_reason = rejectionReason;
+  } else {
+    if (booking.rejection_reason) {
+      booking.rejection_reason = "";
+    }
+  }
   booking.status_history = [
     ...(Array.isArray(booking.status_history) ? booking.status_history : []),
     {
@@ -1353,6 +1367,12 @@ app.patch("/api/owner/bookings/:id/status", ensureSession, async (req, res) => {
     );
   }
   if (nextStatus === "rejected") {
+    const blockedDates = buildUnavailableDates(booking.check_in, booking.check_out);
+    const existingUnavailableDates = Array.isArray(property.unavailable_dates) ? property.unavailable_dates : [];
+    property.unavailable_dates = existingUnavailableDates.filter((date) => !blockedDates.includes(date));
+    property.status = deriveStatus(property);
+    await property.save();
+
     await Payment.updateMany(
       buildMixedIdMatcher("booking_id", booking._id) || { booking_id: booking._id },
       {
