@@ -771,16 +771,19 @@ function updateDateRangeDisplay() {
 function openDatePicker() {
   syncPickerMonth(bookingCheckin.value || getTodayKey());
   renderDatePicker();
+  if (!datePicker) return;
   datePicker.classList.remove("hidden");
-  dateRangeTrigger.setAttribute("aria-expanded", "true");
+  if (dateRangeTrigger) dateRangeTrigger.setAttribute("aria-expanded", "true");
 }
 
 function closeDatePicker() {
+  if (!datePicker) return;
   datePicker.classList.add("hidden");
-  dateRangeTrigger.setAttribute("aria-expanded", "false");
+  if (dateRangeTrigger) dateRangeTrigger.setAttribute("aria-expanded", "false");
 }
 
 function toggleDatePicker() {
+  if (!datePicker) return;
   if (datePicker.classList.contains("hidden")) {
     openDatePicker();
     return;
