@@ -2077,11 +2077,17 @@ async function connectDatabase() {
 
 connectDatabase()
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`BookMe server running on http://localhost:${PORT}`);
-    });
+    console.log("Connected to database successfully");
+    
+    if (!process.env.VERCEL) {
+      app.listen(PORT, () => {
+        console.log(`BookMe server running on http://localhost:${PORT}`);
+      });
+    }
   })
   .catch((error) => {
-    console.error("Failed to start BookMe server:", error);
+    console.error("Failed to connect to database:", error);
     process.exit(1);
   });
+
+export default app;
