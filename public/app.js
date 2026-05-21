@@ -2947,7 +2947,8 @@ document.addEventListener("click", (event) => {
   }
 });
 
-bookingForm.addEventListener("submit", async (event) => {
+if (bookingForm) {
+  bookingForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   if (!validateBookingForm()) {
@@ -3018,23 +3019,28 @@ bookingForm.addEventListener("submit", async (event) => {
   } catch (error) {
     showToast("Не вдалося створити бронювання", error.message);
   }
-});
+  });
+}
 
-document.getElementById("contact-form").addEventListener("submit", (event) => {
-  event.preventDefault();
+const contactFormEl = document.getElementById("contact-form");
+if (contactFormEl) {
+  contactFormEl.addEventListener("submit", (event) => {
+    event.preventDefault();
 
-  if (!validateContactForm()) {
-    return;
-  }
+    if (!validateContactForm()) {
+      return;
+    }
 
-  showToast("Запит надіслано", "Ми зв'яжемося з вами найближчим часом.");
-  event.target.reset();
-});
+    showToast("Запит надіслано", "Ми зв'яжемося з вами найближчим часом.");
+    event.target.reset();
+  });
+}
 
-authTabLogin.addEventListener("click", () => switchAuthTab("login"));
-authTabRegister.addEventListener("click", () => switchAuthTab("register"));
+if (authTabLogin) authTabLogin.addEventListener("click", () => switchAuthTab("login"));
+if (authTabRegister) authTabRegister.addEventListener("click", () => switchAuthTab("register"));
 
-authLoginForm.addEventListener("submit", async (event) => {
+if (authLoginForm) {
+  authLoginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   clearAuthMessages();
 
@@ -3052,9 +3058,11 @@ authLoginForm.addEventListener("submit", async (event) => {
   } catch (error) {
     showAuthMessage(authLoginMessage, error.message);
   }
-});
+  });
+}
 
-authRegisterForm.addEventListener("submit", async (event) => {
+if (authRegisterForm) {
+  authRegisterForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   clearAuthMessages();
 
@@ -3078,23 +3086,26 @@ authRegisterForm.addEventListener("submit", async (event) => {
   } catch (error) {
     showAuthMessage(authRegisterMessage, error.message);
   }
-});
+  });
+}
 
-document.getElementById("login-form").addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const email = document.getElementById("login-email").value.trim().toLowerCase();
-  const password = document.getElementById("login-password").value.trim();
+const loginFormEl = document.getElementById("login-form");
+if (loginFormEl) {
+  loginFormEl.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const email = (document.getElementById("login-email")?.value || "").trim().toLowerCase();
+    const password = (document.getElementById("login-password")?.value || "").trim();
 
-  try {
-    const { user } = await apiRequest("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password })
-    });
+    try {
+      const { user } = await apiRequest("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password })
+      });
 
-    if (user.role !== "owner") {
-      showToast("Доступ заборонено", "У панель власника може увійти лише користувач з роллю owner.");
-      return;
-    }
+        if (user.role !== "owner") {
+          showToast("Доступ заборонено", "У панель власника може увійти лише користувач з роллю owner.");
+          return;
+        }
 
     currentUser = user;
     isUserAuthenticated = true;
@@ -3107,10 +3118,13 @@ document.getElementById("login-form").addEventListener("submit", async (event) =
   } catch (error) {
     showToast("Помилка входу", error.message);
   }
-});
+  });
+}
 
-document.getElementById("close-modal-btn").addEventListener("click", closeModal);
-document.getElementById("complete-profile-btn").addEventListener("click", redirectToProfileCompletion);
+const closeModalBtn = document.getElementById("close-modal-btn");
+if (closeModalBtn) closeModalBtn.addEventListener("click", closeModal);
+const completeProfileBtn = document.getElementById("complete-profile-btn");
+if (completeProfileBtn) completeProfileBtn.addEventListener("click", redirectToProfileCompletion);
 document.getElementById("edit-profile-btn").addEventListener("click", openProfileEditModal);
 dashboardEditProfileButton.addEventListener("click", openProfileEditModal);
 document.getElementById("close-profile-edit-btn").addEventListener("click", closeProfileEditModal);
