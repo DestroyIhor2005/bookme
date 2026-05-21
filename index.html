@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Бронювання житла</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=20260514-7">
+</head>
+<body>
+  <section class="auth-gate" id="auth-gate">
+    <div class="auth-gate__card">
+      <p class="eyebrow">BookMe</p>
+      <h1>Ласкаво просимо</h1>
+      <p class="auth-gate__subtitle">Увійдіть або створіть акаунт, щоб перейти до каталогу житла.</p>
+
+      <div class="auth-switch" role="tablist" aria-label="Перемикання форм авторизації">
+        <button type="button" class="auth-switch__btn active" id="auth-tab-login" data-auth-tab="login" role="tab" aria-selected="true">Вхід</button>
+        <button type="button" class="auth-switch__btn" id="auth-tab-register" data-auth-tab="register" role="tab" aria-selected="false">Реєстрація</button>
+      </div>
+
+      <form id="auth-login-form" class="auth-form">
+        <input type="email" id="auth-login-email" placeholder="Email" required>
+        <div class="password-field">
+          <input type="password" id="auth-login-password" placeholder="Пароль" required>
+          <button type="button" class="password-toggle" data-toggle-password="auth-login-password" aria-label="Показати пароль" aria-pressed="false">
+            <span class="eye-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+        <p class="auth-message hidden" id="auth-login-message"></p>
+        <button class="primary-btn" type="submit">Увійти</button>
+      </form>
+
+      <form id="auth-register-form" class="auth-form hidden">
+        <input type="text" id="auth-register-name" placeholder="Ім'я" required>
+        <input type="email" id="auth-register-email" placeholder="Email" required>
+        <div class="password-field">
+          <input type="password" id="auth-register-password" placeholder="Пароль" minlength="6" required>
+          <button type="button" class="password-toggle" data-toggle-password="auth-register-password" aria-label="Показати пароль" aria-pressed="false">
+            <span class="eye-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+        <p class="auth-message hidden" id="auth-register-message"></p>
+        <button class="primary-btn" type="submit">Зареєструватися</button>
+      </form>
+
+    </div>
+  </section>
+
+  <div class="site-shell hidden" id="site-shell">
+    <header class="topbar">
+      <a class="brand" href="#" data-page-link="home">BookMe</a>
+      <nav class="main-nav">
+        <button class="nav-link active" data-page-link="home">Головна</button>
+        <button class="nav-link" data-page-link="catalog">Каталог</button>
+        <button class="nav-link" data-page-link="contacts">Контакти</button>
+        <button class="nav-link accent" id="cabinet-nav-btn" data-page-link="account">Особистий кабінет</button>
+        <div class="notification-wrap">
+          <button class="notification-bell" id="notification-btn" type="button" aria-label="Сповіщення" aria-expanded="false">
+            <span class="notification-bell__icon" aria-hidden="true">🔔</span>
+            <span class="notification-dot hidden" id="notification-dot"></span>
+          </button>
+          <div class="notification-popover hidden" id="notification-popover">
+            <div class="notification-popover__head">
+              <strong>Сповіщення</strong>
+              <button class="secondary-btn notification-popover__read-btn" id="notifications-mark-read-btn" type="button">Позначити прочитаними</button>
+            </div>
+            <div class="notification-popover__list" id="notifications-list"></div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page active" id="home-page">
+        <section class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow">Інформаційна система бронювання житла</p>
+            <h1>Зручне бронювання житла без плутанини в датах</h1>
+            <p class="hero-text">
+              BookMe поєднує пошук житла, перевірку доступності та оформлення заявки в одному
+              інтерфейсі. Ви швидко знаходите варіант під свій період, а власник одразу отримує
+              запит без накладок у календарі.
+            </p>
+            <div class="hero-actions">
+              <button class="primary-btn" data-page-link="catalog">Переглянути житло</button>
+              <button class="secondary-btn" id="hero-cabinet-btn" data-page-link="account">Особистий кабінет</button>
+            </div>
+          </div>
+          <div class="hero-card">
+            <div class="mini-stat">
+              <span class="mini-stat__value">Для гостей</span>
+              <span class="mini-stat__label">Пошук за містом, ціною, датами та кількістю гостей</span>
+            </div>
+            <div class="mini-stat">
+              <span class="mini-stat__value">Для власників</span>
+              <span class="mini-stat__label">Керування житлом, заявками, оплатами та статусами</span>
+            </div>
+            <div class="mini-stat">
+              <span class="mini-stat__value">Швидке підтвердження</span>
+              <span class="mini-stat__label">Статус бронювання оновлюється одразу, тож ви бачите актуальний результат</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="features">
+          <article class="feature-card">
+            <h2>Швидкий пошук</h2>
+            <p>Фільтрація за містом, типом житла, кількістю гостей та ціновим діапазоном.</p>
+          </article>
+          <article class="feature-card">
+            <h2>Актуальна доступність</h2>
+            <p>Система показує лише ті об'єкти, які доступні на обрані користувачем дати.</p>
+          </article>
+          <article class="feature-card">
+            <h2>Керування бронюваннями</h2>
+            <p>Власник бачить заявки, календар зайнятості та інформацію про оплату в одному місці.</p>
+          </article>
+        </section>
+
+        <section class="featured-section">
+          <div class="section-heading">
+            <p class="eyebrow">Популярні варіанти</p>
+            <h2>Рекомендоване житло</h2>
+          </div>
+          <div class="property-grid" id="featured-grid"></div>
+        </section>
+
+        <section class="journey-section">
+          <div class="section-heading">
+            <p class="eyebrow">Як це працює</p>
+            <h2>Три кроки до підтвердженого бронювання</h2>
+          </div>
+          <div class="journey-grid">
+            <article class="journey-card">
+              <span>1</span>
+              <h3>Оберіть місто та дати</h3>
+              <p>Система підбере житло, яке доступне саме на потрібний вам період.</p>
+            </article>
+            <article class="journey-card">
+              <span>2</span>
+              <h3>Перегляньте деталі</h3>
+              <p>Відкрийте картку об'єкта, перегляньте фото, зручності, правила проживання і ціну.</p>
+            </article>
+            <article class="journey-card">
+              <span>3</span>
+              <h3>Створіть бронювання</h3>
+              <p>Заповніть форму, отримайте підтвердження заявки та відстежуйте її статус у кабінеті.</p>
+            </article>
+          </div>
+        </section>
+      </section>
+
+      <section class="page" id="catalog-page">
+        <div class="section-heading wide">
+          <div>
+            <p class="eyebrow">Каталог</p>
+            <h2>Оберіть житло під вашу подорож</h2>
+          </div>
+          <p class="section-note">Пошук і фільтрація працюють без перезавантаження сторінки.</p>
+        </div>
+
+        <section class="filters-panel">
+          <label>
+            <span>Місто</span>
+            <select id="filter-city" data-blank-default="true">
+              <option value="all"></option>
+            </select>
+          </label>
+          <label>
+            <span>Тип житла</span>
+            <select id="filter-type" data-blank-default="true">
+              <option value="all">Усі типи житла</option>
+              <option value="Квартира">Квартира</option>
+              <option value="Будинок">Будинок</option>
+            </select>
+          </label>
+          <label>
+            <span>Гостей</span>
+            <select id="filter-guests" data-blank-default="true">
+              <option value="0">Будь-яка кількість гостей</option>
+              <option value="lte_2">До 2</option>
+              <option value="lte_4">До 4</option>
+              <option value="lte_6">До 6</option>
+              <option value="gte_6">Від 6</option>
+            </select>
+          </label>
+          <label>
+            <span>Ціна, грн</span>
+            <input id="filter-price" type="range" min="1900" max="6000" step="100" value="6000">
+            <strong id="filter-price-value">6000 грн</strong>
+          </label>
+          <div class="filters-actions">
+            <button class="secondary-btn" id="filters-clear-btn" type="button">Очистити фільтри</button>
+          </div>
+        </section>
+
+        <div class="catalog-summary card-block">
+          <div>
+            <strong id="catalog-count">0 об'єктів</strong>
+            <p class="section-note">У каталозі відображаються лише варіанти, що відповідають поточним фільтрам.</p>
+          </div>
+          <div class="status-inline-list">
+            <span class="status-pill">Швидке бронювання</span>
+            <span class="status-pill">Актуальна доступність</span>
+            <span class="status-pill">Миттєвий запит</span>
+          </div>
+        </div>
+
+        <div class="property-grid" id="catalog-grid"></div>
+      </section>
+
+      <section class="page" id="account-page">
+        <div class="section-heading wide">
+          <div>
+            <p class="eyebrow">Особистий кабінет</p>
+            <h2 id="account-title">Мій профіль та бронювання</h2>
+          </div>
+          <p class="section-note" id="account-subtitle">Історія активних, майбутніх і завершених замовлень користувача.</p>
+        </div>
+
+        <section class="account-layout">
+          <article class="card-block">
+            <h3>Профіль користувача</h3>
+            <div class="profile-grid">
+              <div>
+                <span class="profile-label">Ім'я</span>
+                <strong id="profile-name">-</strong>
+              </div>
+              <div>
+                <span class="profile-label">Прізвище</span>
+                <strong id="profile-last-name">Не вказано</strong>
+              </div>
+              <div>
+                <span class="profile-label">Email</span>
+                <strong id="profile-email">-</strong>
+              </div>
+              <div>
+                <span class="profile-label">Телефон</span>
+                <strong id="profile-phone">Не вказано</strong>
+              </div>
+              <div>
+                <span class="profile-label">Активних бронювань</span>
+                <strong id="profile-bookings">0</strong>
+              </div>
+            </div>
+            <p class="profile-foreign-note hidden" id="foreign-phone-note"></p>
+            <button class="secondary-btn" id="edit-profile-btn" type="button">Редагувати профіль</button>
+            <button class="secondary-btn" id="open-chats-btn" type="button">Чати</button>
+          </article>
+          <article class="card-block">
+            <h3>Статуси бронювань</h3>
+            <div class="status-inline-list status-filter-list" id="booking-status-filters">
+              <button class="status-pill status-pill--interactive" type="button" data-booking-status-filter="new">Нове</button>
+              <button class="status-pill status-pill--interactive" type="button" data-booking-status-filter="confirmed">Підтверджено</button>
+              <button class="status-pill status-pill--interactive" type="button" data-booking-status-filter="completed">Завершено</button>
+            </div>
+            <div class="status-summary-list" id="booking-status-summary"></div>
+          </article>
+          <article class="card-block hidden" id="chats-list-card">
+            <h3>Мої чати</h3>
+            <div id="chats-list-container"></div>
+          </article>
+        </section>
+      </section>
+
+      <section class="page" id="details-page">
+        <div class="section-heading wide">
+          <div>
+            <p class="eyebrow">Деталі житла</p>
+            <h2 id="details-title">Об'єкт</h2>
+          </div>
+          <button class="secondary-btn" id="details-back-btn" type="button">Повернутись назад</button>
+        </div>
+
+        <section class="details-layout">
+          <div class="details-main">
+            <div class="details-gallery" id="details-gallery"></div>
+            <section class="details-description card-block">
+              <h3>Опис</h3>
+              <p id="details-description"></p>
+            </section>
+            <section class="details-info card-block">
+              <h3>Характеристики житла</h3>
+              <p class="details-meta" id="details-meta"></p>
+              <ul class="details-list" id="details-amenities"></ul>
+            </section>
+            <section class="map-box">
+              <div class="map-box__header">
+                <h3>Розташування на мапі</h3>
+                <span id="details-map-caption"></span>
+              </div>
+              <iframe
+                id="details-map"
+                title="Місцезнаходження житла"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                src="about:blank"
+              ></iframe>
+            </section>
+          </div>
+          <aside class="booking-card">
+            <p class="booking-price" id="details-price"></p>
+            <p class="section-note" id="details-check-times"></p>
+
+            <form id="booking-form" class="booking-form" novalidate>
+              <h3>Оформлення бронювання</h3>
+              <input type="text" id="booking-name" placeholder="Ваше ім'я" required>
+              <input type="email" id="booking-email" placeholder="Email" required>
+              <input type="tel" id="booking-phone" placeholder="Телефон" required>
+              <div class="form-message hidden" id="booking-form-message"></div>
+
+              <div class="date-range-field">
+                <label class="date-range-field__label" for="date-range-trigger">Дати проживання</label>
+                <input type="hidden" id="booking-checkin">
+                <input type="hidden" id="booking-checkout">
+                <button type="button" class="date-range-trigger" id="date-range-trigger" aria-expanded="false">
+                  <span id="date-range-text">Оберіть дати проживання</span>
+                  <span class="date-range-trigger__icon" aria-hidden="true">▦</span>
+                </button>
+                <div class="date-picker hidden" id="date-picker">
+                  <div class="date-picker__header">
+                    <button type="button" class="date-picker__nav" id="date-picker-prev" aria-label="Попередній місяць">‹</button>
+                    <strong id="date-picker-month"></strong>
+                    <button type="button" class="date-picker__nav" id="date-picker-next" aria-label="Наступний місяць">›</button>
+                  </div>
+                  <div class="date-picker__weekdays">
+                    <span>Пн</span>
+                    <span>Вт</span>
+                    <span>Ср</span>
+                    <span>Чт</span>
+                    <span>Пт</span>
+                    <span>Сб</span>
+                    <span>Нд</span>
+                  </div>
+                  <div class="date-picker__grid" id="date-picker-grid"></div>
+                  <div class="date-picker__footer">
+                    <span id="date-picker-hint">Оберіть дату заїзду, а потім дату виїзду</span>
+                    <button type="button" class="date-picker__clear" id="date-picker-clear">Очистити</button>
+                  </div>
+                </div>
+              </div>
+
+              <input type="text" id="booking-nights-input" placeholder="Кількість ночей" readonly>
+              <input type="text" id="booking-estimate" placeholder="Орієнтовна вартість" readonly>
+              <div class="promo-code-field hidden" id="booking-promocode-field">
+                <label class="promo-code-field__label" for="booking-promocode">Промокод</label>
+                <div class="promo-code-field__row">
+                  <input type="text" id="booking-promocode" placeholder="Введіть промокод" autocomplete="off" spellcheck="false">
+                  <button class="secondary-btn promo-code-field__apply" id="booking-promocode-apply" type="button">Застосувати</button>
+                </div>
+                <p class="promo-code-message hidden" id="booking-promocode-message"></p>
+              </div>
+              <button class="secondary-btn hidden" id="open-chat-btn" type="button">Чат з власником</button>
+              <button class="primary-btn" type="submit">Забронювати</button>
+            </form>
+
+            <div class="availability-box">
+              <div class="availability-box__header">
+                <h3>Календар вільних дат</h3>
+                <span id="availability-month"></span>
+              </div>
+              <div class="availability-grid" id="availability-grid"></div>
+            </div>
+          </aside>
+        </section>
+      </section>
+
+      <section class="page" id="contacts-page">
+        <div class="section-heading wide">
+          <div>
+            <p class="eyebrow">Контакти</p>
+            <h2>Зв'яжіться з нами</h2>
+          </div>
+        </div>
+
+        <section class="contacts-layout">
+          <article class="card-block support-card">
+            <h3>Служба підтримки</h3>
+            <p class="section-note">Ми допомагаємо з бронюваннями, оплатами та питаннями до власників житла щодня.</p>
+
+            <div class="support-grid">
+              <div class="support-item">
+                <span class="profile-label">Телефон</span>
+                <strong>+38 (067) 123-45-67</strong>
+              </div>
+              <div class="support-item">
+                <span class="profile-label">Email</span>
+                <strong>support@bookme.ua</strong>
+              </div>
+              <div class="support-item">
+                <span class="profile-label">Telegram</span>
+                <strong>@bookmebot</strong>
+              </div>
+              <div class="support-item">
+                <span class="profile-label">Графік</span>
+                <strong>Пн-Нд: 08:00-22:00</strong>
+              </div>
+            </div>
+
+            <div class="status-inline-list">
+              <span class="status-pill">Середній час відповіді: 10 хв</span>
+              <span class="status-pill">Підтримка 7 днів на тиждень</span>
+            </div>
+
+            <div class="support-faq">
+              <h4>Найчастіші питання</h4>
+              <ul>
+                <li>Як змінити дати бронювання після підтвердження?</li>
+                <li>Що робити, якщо власник не відповідає в чаті?</li>
+                <li>Як повертаються кошти при скасуванні?</li>
+              </ul>
+            </div>
+          </article>
+
+          <form class="contact-form card-block" id="contact-form" novalidate>
+            <h3>Надіслати запит</h3>
+            <input type="text" id="contact-name" placeholder="Ім'я" required>
+            <input type="email" id="contact-email" placeholder="Email" required>
+            <input type="text" id="contact-reason" placeholder="Причина звернення" required>
+            <textarea id="contact-message" rows="5" placeholder="Ваше повідомлення" required></textarea>
+            <button class="primary-btn" type="submit">Надіслати</button>
+          </form>
+        </section>
+      </section>
+
+      <section class="page" id="dashboard-page">
+        <div class="dashboard-layout">
+          <aside class="dashboard-sidebar">
+            <h2>Панель користувача</h2>
+            <button class="sidebar-link active" data-dash-link="overview">Огляд</button>
+            <button class="sidebar-link" data-dash-link="properties">Об'єкти</button>
+            <button class="sidebar-link" data-dash-link="bookings">Бронювання</button>
+            <button class="sidebar-link" data-dash-link="bookings-archive">Архів бронювань</button>
+            <button class="sidebar-link" data-dash-link="payments" id="dashboard-payments-link">Оплати</button>
+            <button class="sidebar-link" id="dashboard-open-chats-btn" data-dash-link="chats" type="button">Чати</button>
+            <button class="sidebar-link" data-dash-link="notifications">Сповіщення</button>
+            <button class="secondary-btn" id="logout-btn">Вийти</button>
+          </aside>
+
+          <div class="dashboard-content">
+            <section class="dash-page active" id="dash-overview">
+              <article class="card-block dashboard-profile-card">
+                <h3>Профіль користувача</h3>
+                <div class="profile-grid">
+                  <div>
+                    <span class="profile-label">Ім'я</span>
+                    <strong id="dashboard-profile-name">-</strong>
+                  </div>
+                  <div>
+                    <span class="profile-label">Прізвище</span>
+                    <strong id="dashboard-profile-last-name">Не вказано</strong>
+                  </div>
+                  <div>
+                    <span class="profile-label">Email</span>
+                    <strong id="dashboard-profile-email">-</strong>
+                  </div>
+                  <div>
+                    <span class="profile-label">Телефон</span>
+                    <strong id="dashboard-profile-phone">Не вказано</strong>
+                  </div>
+                  <div>
+                    <span class="profile-label">Активних бронювань</span>
+                    <strong id="dashboard-profile-bookings">0</strong>
+                  </div>
+                </div>
+                <button class="secondary-btn" id="dashboard-edit-profile-btn" type="button">Редагувати профіль</button>
+              </article>
+
+              <div class="dashboard-metrics" id="dashboard-metrics">
+                <article class="metric-card">
+                  <span>Активні бронювання</span>
+                  <strong>0</strong>
+                </article>
+                <article class="metric-card">
+                  <span>Об'єкти в системі</span>
+                  <strong>0</strong>
+                </article>
+              </div>
+              <div class="overview-grid" id="dashboard-overview-grid">
+                <article class="card-block" id="dashboard-system-state-card">
+                  <h3>Стан системи</h3>
+                  <p>Тут відображається поточний стан ваших об'єктів, бронювань і оплат без тестових заглушок.</p>
+                </article>
+                <article class="card-block" id="dashboard-tasks-card">
+                  <h3>Що потребує уваги</h3>
+                  <div id="owner-tasks"></div>
+                </article>
+              </div>
+            </section>
+
+            <section class="dash-page" id="dash-chats">
+              <article class="card-block" id="dashboard-chats-list-card">
+                <div class="dashboard-section-header">
+                  <div>
+                    <h3>Чати</h3>
+                    <p class="section-note">Список усіх розмов, у яких ви брали участь.</p>
+                  </div>
+                  <span class="dashboard-context-badge">Мої чати</span>
+                </div>
+                <div id="dashboard-chats-container"></div>
+              </article>
+
+              <article class="card-block hidden" id="dashboard-chat-room-card">
+                <div class="dashboard-section-header">
+                  <div>
+                    <p class="eyebrow">Чат</p>
+                    <h3 id="dashboard-chat-room-title">Переписка</h3>
+                    <p class="section-note hidden" id="dashboard-chat-property-hint">Натисніть, щоб перейти до деталей житла</p>
+                    <p class="section-note" id="dashboard-chat-owner-status"></p>
+                  </div>
+                  <button class="secondary-btn" id="dashboard-chat-back-btn" type="button">До списку чатів</button>
+                </div>
+
+                <label class="hidden" id="dashboard-chat-thread-wrap">
+                  <span>Оберіть користувача</span>
+                  <select id="dashboard-chat-thread-select"></select>
+                </label>
+
+                <div class="chat-box" id="dashboard-chat-box"></div>
+
+                <form id="dashboard-chat-form" class="login-form" novalidate>
+                  <textarea id="dashboard-chat-input" rows="3" placeholder="Введіть повідомлення" required></textarea>
+                  <div class="modal-actions">
+                    <button class="primary-btn" type="submit">Надіслати</button>
+                  </div>
+                </form>
+              </article>
+            </section>
+
+            <section class="dash-page" id="dash-properties">
+              <article class="card-block">
+                <div class="owner-properties-header">
+                  <div>
+                    <h3 id="dashboard-properties-form-title">Опублікувати житло</h3>
+                    <p class="section-note" id="dashboard-properties-form-note">Додайте новий об'єкт, щоб він одразу з'явився в каталозі.</p>
+                  </div>
+                </div>
+                <form id="owner-property-form" class="owner-property-form" novalidate>
+                  <input type="text" id="owner-property-title" placeholder="Назва житла" required>
+                  <input type="text" id="owner-property-city" placeholder="Місто" required>
+                  <div class="owner-property-form__field owner-property-form__field--full owner-property-type-field">
+                    <span class="owner-property-form__label">Тип житла</span>
+                    <select id="owner-property-type" required>
+                      <option value="Квартира">Квартира</option>
+                      <option value="Будинок">Будинок</option>
+                    </select>
+                  </div>
+                  <input type="number" id="owner-property-guests" placeholder="Кількість гостей" min="1" max="20" required>
+                  <input type="number" id="owner-property-price" placeholder="Ціна за добу" min="500" step="100" required>
+                  <input type="text" id="owner-property-address" placeholder="Адреса" required>
+                  <input type="text" id="owner-property-amenities" placeholder="Зручності">
+                  <div class="owner-property-form__field owner-property-form__field--full owner-property-photo-field">
+                    <div class="owner-property-photo">
+                      <div class="owner-property-photo__preview" id="owner-property-photo-preview">
+                        <div class="owner-property-photo__placeholder" id="owner-property-photo-placeholder">
+                          <strong>Фото житла</strong>
+                          <span>Додавайте до 7 фото. Перше буде обкладинкою, решта з'являться у галереї об'єкта.</span>
+                        </div>
+                        <div class="owner-property-photo__gallery" id="owner-property-photo-gallery"></div>
+                      </div>
+                      <div class="owner-property-photo__toolbar">
+                        <div>
+                          <p class="owner-property-form__label owner-property-form__label--compact">Фото обкладинки</p>
+                          <p class="owner-property-photo__hint" id="owner-property-photo-name">PNG, JPG або WEBP до 3 МБ.</p>
+                        </div>
+                        <div class="owner-property-photo__actions">
+                          <label class="secondary-btn owner-property-photo__upload" for="owner-property-image">Вибрати фото</label>
+                          <button class="secondary-btn owner-property-photo__clear hidden" id="owner-property-photo-clear" type="button">Прибрати</button>
+                        </div>
+                      </div>
+                      <input type="file" id="owner-property-image" accept="image/png,image/jpeg,image/webp" multiple>
+                    </div>
+                  </div>
+                  <p class="auth-message hidden" id="owner-property-message"></p>
+                  <textarea id="owner-property-description" rows="5" placeholder="Опис житла" required></textarea>
+                  <div class="owner-property-form__actions">
+                    <button class="secondary-btn hidden" id="owner-property-cancel-btn" type="button">Скасувати</button>
+                    <button class="primary-btn" type="submit">Опублікувати житло</button>
+                  </div>
+                </form>
+              </article>
+              <article class="card-block">
+                <h3 id="dashboard-properties-list-title">Об'єкти нерухомості</h3>
+                <div id="owner-properties"></div>
+              </article>
+            </section>
+
+            <section class="dash-page" id="dash-bookings">
+              <article class="card-block" id="dashboard-bookings-card">
+                <div class="dashboard-section-header">
+                  <div>
+                    <h3 id="dashboard-bookings-title">Останні бронювання</h3>
+                    <p class="section-note" id="dashboard-bookings-note">Актуальні бронювання у вашому кабінеті.</p>
+                  </div>
+                  <span class="dashboard-context-badge" id="dashboard-bookings-badge">Мої бронювання</span>
+                </div>
+                <div id="owner-bookings"></div>
+              </article>
+            </section>
+
+            <section class="dash-page" id="dash-bookings-archive">
+              <article class="card-block dashboard-bookings-archive-page">
+                <div class="dashboard-section-header">
+                  <div>
+                    <h3 id="dashboard-bookings-archive-title">Архів бронювань</h3>
+                    <p class="section-note" id="dashboard-bookings-archive-note">Тут зберігаються завершені та скасовані бронювання.</p>
+                  </div>
+                  <span class="dashboard-context-badge dashboard-context-badge--guest" id="dashboard-bookings-archive-badge">Історія</span>
+                </div>
+                <div id="dashboard-bookings-archive"></div>
+              </article>
+            </section>
+
+            <section class="dash-page" id="dash-payments">
+              <article class="card-block">
+                <h3>Інформація про оплати</h3>
+                <div id="owner-payments"></div>
+              </article>
+            </section>
+
+            <section class="dash-page" id="dash-notifications">
+              <article class="card-block">
+                <h3>Сповіщення</h3>
+                <div class="dashboard-notification-list" id="owner-notifications"></div>
+              </article>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+          <p>BookMe, 2026. Система бронювання житла для малих і середніх орендодавців.</p>
+    </footer>
+  </div>
+
+  <div class="modal-backdrop hidden" id="auth-modal">
+    <div class="modal-card">
+      <button class="modal-close" id="close-modal-btn">×</button>
+      <p class="eyebrow">Вхід для власника</p>
+      <h2>Авторизація</h2>
+      <form id="login-form" class="login-form">
+        <input type="email" id="login-email" placeholder="Email" required>
+        <div class="password-field">
+          <input type="password" id="login-password" placeholder="Пароль" required>
+          <button type="button" class="password-toggle" data-toggle-password="login-password" aria-label="Показати пароль" aria-pressed="false">
+            <span class="eye-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+        <button class="primary-btn" type="submit">Увійти</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="profile-prompt-modal">
+    <div class="modal-card modal-card--wide">
+      <h2>Завершіть налаштування профілю</h2>
+      <p class="modal-note">Щоб перейти до бронювання житла, додайте прізвище та номер телефону в особистому кабінеті.</p>
+      <div class="modal-actions">
+        <button class="primary-btn" id="complete-profile-btn" type="button">Перейти до особистого кабінету</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="profile-edit-modal">
+    <div class="modal-card modal-card--wide">
+      <button class="modal-close" id="close-profile-edit-btn" type="button">×</button>
+      <p class="eyebrow">Профіль</p>
+      <h2>Редагування профілю</h2>
+      <p class="modal-note">Заповніть особисті дані, щоб завершити налаштування акаунта.</p>
+      <form id="profile-edit-form" class="login-form" novalidate>
+          <input type="text" id="profile-edit-name" placeholder="Ім'я" required>
+        <input type="text" id="profile-edit-last-name" placeholder="Прізвище" required>
+        <div class="phone-edit-row">
+          <div class="country-picker" id="profile-country-picker">
+            <button type="button" class="country-picker__trigger" id="profile-country-trigger" aria-expanded="false">
+              <span class="flag-badge flag-badge--ua" id="profile-country-flag" aria-hidden="true"></span>
+              <span id="profile-country-label">UA +380</span>
+              <span class="country-picker__caret" aria-hidden="true">▾</span>
+            </button>
+            <div class="country-picker__menu hidden" id="profile-country-menu">
+              <button type="button" class="country-picker__option" data-code="+380" data-label="UA +380" data-flag="ua">
+                <span class="flag-badge flag-badge--ua" aria-hidden="true"></span>
+                <span>UA +380</span>
+              </button>
+              <button type="button" class="country-picker__option" data-code="+48" data-label="PL +48" data-flag="pl">
+                <span class="flag-badge flag-badge--pl" aria-hidden="true"></span>
+                <span>PL +48</span>
+              </button>
+              <button type="button" class="country-picker__option" data-code="+49" data-label="DE +49" data-flag="de">
+                <span class="flag-badge flag-badge--de" aria-hidden="true"></span>
+                <span>DE +49</span>
+              </button>
+              <button type="button" class="country-picker__option" data-code="+1" data-label="US +1" data-flag="us">
+                <span class="flag-badge flag-badge--us" aria-hidden="true"></span>
+                <span>US +1</span>
+              </button>
+              <button type="button" class="country-picker__option" data-code="+44" data-label="GB +44" data-flag="gb">
+                <span class="flag-badge flag-badge--gb" aria-hidden="true"></span>
+                <span>GB +44</span>
+              </button>
+            </div>
+            <input type="hidden" id="profile-edit-country-code" value="+380">
+          </div>
+          <input type="tel" id="profile-edit-phone" placeholder="(XX) XXX-XX-XX" required>
+        </div>
+        <small class="section-note" id="profile-phone-help">Формат номера залежить від обраного коду країни.</small>
+        <p class="auth-message hidden" id="profile-edit-message"></p>
+        <div class="modal-actions">
+          <button class="secondary-btn" id="cancel-profile-edit-btn" type="button">Скасувати</button>
+          <button class="primary-btn" type="submit">Зберегти зміни</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="chat-modal">
+    <div class="modal-card modal-card--wide">
+      <button class="modal-close" id="close-chat-btn" type="button">×</button>
+      <p class="eyebrow">Чат</p>
+      <h2 id="chat-modal-title">Чат з власником</h2>
+      <p class="modal-note" id="chat-owner-status"></p>
+      <label class="hidden" id="chat-thread-wrap">
+        <span>Оберіть користувача</span>
+        <select id="chat-thread-select"></select>
+      </label>
+      <div class="chat-box" id="chat-box"></div>
+      <form id="chat-form" class="login-form" novalidate>
+        <textarea id="chat-input" rows="3" placeholder="Введіть повідомлення" required></textarea>
+        <div class="modal-actions">
+          <button class="primary-btn" type="submit">Надіслати</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <strong id="toast-title"></strong>
+    <p id="toast-message"></p>
+  </div>
+
+  <!-- Confirm modal (used for delete confirmation) -->
+  <div class="modal-backdrop hidden" id="confirm-modal">
+    <div class="modal-card">
+      <p id="confirm-modal-text">Підтвердьте дію</p>
+      <div class="modal-actions">
+        <button id="confirm-ok" class="primary-btn" type="button">OK</button>
+        <button id="confirm-cancel" class="secondary-btn" type="button">Скасувати</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit message modal -->
+  <div class="modal-backdrop hidden" id="chat-edit-modal">
+    <div class="modal-card">
+      <p id="chat-edit-modal-text">Редагування повідомлення</p>
+      <textarea id="chat-edit-modal-input" rows="4" placeholder="Введіть новий текст повідомлення"></textarea>
+      <div class="modal-actions">
+        <button id="chat-edit-save" class="primary-btn" type="button">Зберегти</button>
+        <button id="chat-edit-cancel" class="secondary-btn" type="button">Скасувати</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking rejection reason modal -->
+  <div class="modal-backdrop hidden" id="booking-reject-modal">
+    <div class="modal-card">
+      <p>Вкажіть причину відхилення бронювання</p>
+      <textarea id="booking-reject-reason" rows="4"></textarea>
+      <div class="modal-actions">
+        <button id="booking-reject-confirm" class="primary-btn" type="button">Відхилити</button>
+        <button id="booking-reject-cancel" class="secondary-btn" type="button">Скасувати</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking rejection reason modal -->
+  <div class="modal-backdrop hidden" id="booking-reject-modal">
+    <div class="modal-card">
+      <p>Вкажіть причину відхилення бронювання</p>
+      <textarea id="booking-reject-reason" rows="4" placeholder="Наприклад: об'єкт вже заброньовано на цей період"></textarea>
+      <div class="modal-actions">
+        <button id="booking-reject-confirm" class="primary-btn" type="button">Відхилити</button>
+        <button id="booking-reject-cancel" class="secondary-btn" type="button">Скасувати</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=20260514-7"></script>
+</body>
+</html>
