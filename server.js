@@ -35,6 +35,17 @@ app.use(
   })
 );
 
+  // Keep track of DB readiness so runtime errors don't crash the serverless function
+  let DB_CONNECTED = false;
+
+  // If DB is not connected, return 503 for API requests to avoid crashing the whole function.
+  app.use((req, res, next) => {
+    if (String(req.path || "").startsWith("/api") && !DB_CONNECTED) {
+      return res.status(503).json({ message: "Сервіс тимчасово недоступний (база даних не підключена)." });
+    }
+    next();
+  });
+
 const userSchema = new mongoose.Schema(
   {
     name: String,
@@ -2085,7 +2096,8 @@ async function connectDatabase() {
 connectDatabase()
   .then(() => {
     console.log("Connected to database successfully");
-    
+    DB_CONNECTED = true;
+
     if (!process.env.VERCEL) {
       app.listen(PORT, () => {
         console.log(`BookMe server running on http://localhost:${PORT}`);
@@ -2093,8 +2105,20 @@ connectDatabase()
     }
   })
   .catch((error) => {
+    // Log the error but do not exit the process in a serverless environment.
+    // Exiting the process causes Vercel to show a function crash (500). Instead,
+    // keep the function alive and respond with 503 for API routes until the DB is ready.
+    DB_CONNECTED = false;
     console.error("Failed to connect to database:", error);
-    process.exit(1);
   });
+
+// Log unhandled errors to help debugging without crashing the process in serverless.
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Rejection:", reason);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+});
 
 export default app;
