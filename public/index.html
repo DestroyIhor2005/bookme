@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Бронювання житла</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css?v=20260514-7">
+</head>
+<body>
+  <section class="auth-gate" id="auth-gate">
+    <div class="auth-gate__card">
+      <p class="eyebrow">BookMe</p>
+      <h1>Ласкаво просимо</h1>
+      <p class="auth-gate__subtitle">Увійдіть або створіть акаунт, щоб перейти до каталогу житла.</p>
+
+      <div class="auth-switch" role="tablist" aria-label="Перемикання форм авторизації">
+        <button type="button" class="auth-switch__btn active" id="auth-tab-login" data-auth-tab="login" role="tab" aria-selected="true">Вхід</button>
+        <button type="button" class="auth-switch__btn" id="auth-tab-register" data-auth-tab="register" role="tab" aria-selected="false">Реєстрація</button>
+      </div>
+
+      <form id="auth-login-form" class="auth-form">
+        <input type="email" id="auth-login-email" placeholder="Email" required>
+        <div class="password-field">
+          <input type="password" id="auth-login-password" placeholder="Пароль" required>
+          <button type="button" class="password-toggle" data-toggle-password="auth-login-password" aria-label="Показати пароль" aria-pressed="false">
+            <span class="eye-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+        <p class="auth-message hidden" id="auth-login-message"></p>
+        <button class="primary-btn" type="submit">Увійти</button>
+      </form>
+
+      <form id="auth-register-form" class="auth-form hidden">
+        <input type="text" id="auth-register-name" placeholder="Ім'я" required>
+        <input type="email" id="auth-register-email" placeholder="Email" required>
+        <div class="password-field">
+          <input type="password" id="auth-register-password" placeholder="Пароль" minlength="6" required>
+          <button type="button" class="password-toggle" data-toggle-password="auth-register-password" aria-label="Показати пароль" aria-pressed="false">
+            <span class="eye-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+        <p class="auth-message hidden" id="auth-register-message"></p>
+        <button class="primary-btn" type="submit">Зареєструватися</button>
+      </form>
+
+    </div>
+  </section>
+
+  <div class="site-shell hidden" id="site-shell">
+    <!-- ... full content identical to root index.html ... -->
+  </div>
+
+  <script src="/app.js?v=20260514-7"></script>
+</body>
+</html>

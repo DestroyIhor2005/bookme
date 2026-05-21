@@ -2,6 +2,7 @@ import "dotenv/config";
 import bcrypt from "bcryptjs";
 import express from "express";
 import session from "express-session";
+import MongoStore from "connect-mongo";
 import mongoose from "mongoose";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -16,14 +17,20 @@ const SESSION_SECRET = process.env.SESSION_SECRET || "bookme-dev-session-secret"
 const app = express();
 
 app.use(express.json({ limit: "6mb" }));
+// Use MongoDB-backed session store so sessions persist across serverless invocations
 app.use(
   session({
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: MONGODB_URI,
+      collectionName: "sessions",
+      ttl: 60 * 60 * 24 * 7 // 7 days
+    }),
     cookie: {
       httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 8
+      maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
     }
   })
 );
@@ -2064,10 +2071,11 @@ app.get("/api/bootstrap", ensureSession, async (req, res) => {
   res.json(payload);
 });
 
-app.use(express.static(__dirname));
+// Serve static files from the public folder (use __dirname which is derived above)
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get("*", (_req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(__dirname, 'public', "index.html"));
 });
 
 async function connectDatabase() {
