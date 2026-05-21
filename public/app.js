@@ -1786,6 +1786,8 @@ function showPage(pageId, options = {}) {
 }
 
 function renderNotificationsUI() {
+  if (!notificationDot || !notificationsMarkReadButton || !notificationsList) return;
+
   notificationDot.classList.toggle("hidden", unreadNotificationsCount === 0);
   notificationsMarkReadButton.disabled = unreadNotificationsCount === 0;
 
@@ -1804,12 +1806,14 @@ function renderNotificationsUI() {
 }
 
 function toggleNotificationsPopover() {
+  if (!notificationPopover || !notificationButton) return;
   const isHidden = notificationPopover.classList.contains("hidden");
   notificationPopover.classList.toggle("hidden", !isHidden);
   notificationButton.setAttribute("aria-expanded", String(isHidden));
 }
 
 function closeNotificationsPopover() {
+  if (!notificationPopover || !notificationButton) return;
   notificationPopover.classList.add("hidden");
   notificationButton.setAttribute("aria-expanded", "false");
 }
@@ -2897,6 +2901,7 @@ document.addEventListener("click", (event) => {
 
     if (!modal || !rejectReasonField || !confirmBtn || !cancelBtn) return;
 
+    if (!modal || !rejectReasonField || !confirmBtn || !cancelBtn) return;
     rejectReasonField.value = "";
     modal.classList.remove("hidden");
     syncModalScrollLock();
