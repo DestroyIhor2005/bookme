@@ -727,7 +727,6 @@ main {
   margin-bottom: 1.5rem;
 }
 
-/* Improved layout & visuals for filters */
 .filters-panel {
   align-items: center;
   gap: 1rem;
@@ -753,12 +752,10 @@ main {
   background: #fff7f1;
 }
 
-/* Make selects and range visually consistent */
 .custom-select__trigger {
   transition: box-shadow 0.18s ease, transform 0.12s ease;
 }
 
-/* Responsive: stack filters on narrow screens */
 @media (max-width: 980px) {
   .filters-panel {
     grid-template-columns: 1fr;
@@ -1567,7 +1564,6 @@ select {
   font-size: 0.92rem;
 }
 
-/* Contact form textarea: auto-expand up to a limit, keep card size stable */
 .contact-form textarea {
   max-height: 360px;
   overflow: auto;
@@ -1637,8 +1633,6 @@ select {
   resize: vertical;
 }
 
-/* Ensure the main contact textarea used in the contact card is not user-resizable
-   and will only change height via JavaScript auto-expansion. */
 #contact-message {
   resize: none !important;
   max-height: 360px !important;
@@ -1958,8 +1952,6 @@ select {
   resize: none;
   overflow: hidden;
 }
-
-/* Reject modal styles removed (UI no longer includes reject modal) */
 
 .chat-message--own {
   align-self: flex-end;
@@ -2797,7 +2789,6 @@ select {
   border-radius: 18px;
   border: 1px dashed rgba(189, 107, 60, 0.35);
   background: transparent;
-  /* when an image is set via inline background-image, fill the preview (cover) */
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;

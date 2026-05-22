@@ -17,7 +17,6 @@ const SESSION_SECRET = process.env.SESSION_SECRET || "bookme-dev-session-secret"
 const app = express();
 
 app.use(express.json({ limit: "6mb" }));
-// Use MongoDB-backed session store so sessions persist across serverless invocations
 app.use(
   session({
     secret: SESSION_SECRET,
@@ -26,19 +25,17 @@ app.use(
     store: MongoStore.create({
       mongoUrl: MONGODB_URI,
       collectionName: "sessions",
-      ttl: 60 * 60 * 24 * 7 // 7 days
+      ttl: 60 * 60 * 24 * 7
     }),
     cookie: {
       httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+      maxAge: 1000 * 60 * 60 * 24 * 7
     }
   })
 );
 
-  // Keep track of DB readiness so runtime errors don't crash the serverless function
   let DB_CONNECTED = false;
 
-  // If DB is not connected, return 503 for API requests to avoid crashing the whole function.
   app.use((req, res, next) => {
     if (String(req.path || "").startsWith("/api") && !DB_CONNECTED) {
       return res.status(503).json({ message: "Сервіс тимчасово недоступний (база даних не підключена)." });
@@ -607,11 +604,9 @@ function normalizeBooking(booking, propertyMap = new Map(), userMap = new Map())
     propertyId: String(property?.id || property?._id || booking.property_id || ""),
     userId: String(user?.id || user?._id || booking.user_id || "")
     ,
-    // include guest phone when available (sanitized via sanitizeUser)
     guestPhone: user?.phone || "",
     guestPhoneIsForeign: Boolean(user?.isForeignPhone)
     ,
-    // expose rejection reason for archived/rejected bookings
     rejectionReason: String(booking.rejection_reason || "")
   };
 }
@@ -1449,13 +1444,11 @@ app.post("/api/owner/properties", ensureSession, async (req, res) => {
   for (const customImage of customImages) {
     let value = String(customImage || "").trim();
 
-    // If image is a CSS-wrapped string like "linear-gradient(...), url('...')", try to extract inner url(...)
     const urlMatch = value.match(/url\(['"]?(.*?)['"]?\)/i);
     if (urlMatch && urlMatch[1]) {
       value = urlMatch[1];
     }
 
-    // If it's still a linear-gradient fallback without url, try to find data: inside
     if (!ownerImagePattern.test(value) && /data:image\//i.test(value)) {
       const dataMatch = value.match(/(data:image\/[a-z]+;base64,[^'"\)\s]+)/i);
       if (dataMatch) {
@@ -1463,7 +1456,6 @@ app.post("/api/owner/properties", ensureSession, async (req, res) => {
       }
     }
 
-    // Accept either data URLs or remote http(s) URLs (we allow keeping existing remote images)
     if (!ownerImagePattern.test(value) && !/^https?:\/\//i.test(value)) {
       return res.status(400).json({ message: "Фото має бути у форматі PNG, JPG або WEBP або коректним URL." });
     }
@@ -1693,8 +1685,6 @@ app.get("/api/chat/:propertyId", ensureSession, async (req, res) => {
   const user = req.session.user;
   const requestedUserId = String(req.query.userId || "");
 
-  // Fallback: if a session has a non-owner role but this account is owner_id in chat history,
-  // still allow owner-style chat retrieval for legacy/inconsistent role states.
   const hasOwnerThreadAccess = Boolean(
     await ChatMessage.exists({
       property_id: propertyIdMatch,
@@ -1716,7 +1706,6 @@ app.get("/api/chat/:propertyId", ensureSession, async (req, res) => {
     }
 
     if (!targetUserId) {
-      // Group by user_id and normalize to string so mixed ObjectId/string values behave consistently
       const threads = await ChatMessage.aggregate([
         { $match: { property_id: propertyIdMatch, is_deleted: { $ne: true } } },
         { $sort: { created_at: -1 } },
@@ -1730,7 +1719,6 @@ app.get("/api/chat/:propertyId", ensureSession, async (req, res) => {
       ]);
 
       const userIdStrings = threads.map((thread) => String(thread._id)).filter(Boolean);
-      // Find users by stringified _id to match both string and ObjectId representations
       const users = await User.find({ $expr: { $in: [{ $toString: "$_id" }, userIdStrings] } }).lean();
       const userMap = new Map(users.map((item) => [String(item._id), sanitizeUser(item)]));
 
@@ -1752,7 +1740,6 @@ app.get("/api/chat/:propertyId", ensureSession, async (req, res) => {
       is_deleted: { $ne: true }
     }).sort({ created_at: 1 }).lean();
 
-    // Mark unread messages from client as read
     await ChatMessage.updateMany(
       {
         property_id: propertyIdMatch,
@@ -1776,9 +1763,6 @@ app.get("/api/chat/:propertyId", ensureSession, async (req, res) => {
     is_deleted: { $ne: true }
   }).sort({ created_at: 1 }).lean();
 
-  // For orphaned chats (property removed but messages still exist), return empty/available history instead of 404.
-
-  // Mark unread messages from owner as read
   await ChatMessage.updateMany(
     {
       property_id: propertyIdMatch,
@@ -1884,7 +1868,6 @@ app.post("/api/chat/:propertyId", ensureSession, async (req, res) => {
   res.status(201).json({ message: chatMessageDto(message, user.role) });
 });
 
-// Delete a chat message for everyone (soft delete)
 app.delete("/api/chat/:propertyId/:messageId", ensureSession, async (req, res) => {
   const property = await Property.findById(req.params.propertyId).lean();
   if (!property) {
@@ -1899,7 +1882,6 @@ app.delete("/api/chat/:propertyId/:messageId", ensureSession, async (req, res) =
     return res.status(404).json({ message: "Повідомлення не знайдено." });
   }
 
-  // Authorization: both sides can delete only their own messages
   if (user.role === "owner") {
     if (String(property.owner_id) !== String(user.id)) {
       return res.status(403).json({ message: "Немає доступу." });
@@ -1908,7 +1890,6 @@ app.delete("/api/chat/:propertyId/:messageId", ensureSession, async (req, res) =
       return res.status(403).json({ message: "Можна видаляти лише власні повідомлення." });
     }
   } else {
-    // client
     if (String(msg.user_id) !== String(user.id) || String(msg.sender_role || "") !== "client") {
       return res.status(403).json({ message: "Немає доступу." });
     }
@@ -1919,7 +1900,6 @@ app.delete("/api/chat/:propertyId/:messageId", ensureSession, async (req, res) =
   return res.json({ success: true });
 });
 
-// Edit a chat message
 app.patch("/api/chat/:propertyId/:messageId", ensureSession, async (req, res) => {
   const property = await Property.findById(req.params.propertyId).lean();
   if (!property) {
@@ -1955,7 +1935,6 @@ app.patch("/api/chat/:propertyId/:messageId", ensureSession, async (req, res) =>
   return res.json({ message: chatMessageDto(updated, user.role) });
 });
 
-// Get list of chats for the current user
 app.get("/api/user-chats", ensureSession, async (req, res) => {
   const user = req.session.user;
   if (user.role !== "owner" && !user.isForeignPhone) {
@@ -2011,7 +1990,6 @@ app.get("/api/user-chats", ensureSession, async (req, res) => {
     groupStage
   ]);
 
-  // Fetch property details for each chat — match by stringified _id to handle mixed types
   const propertyIdStrings = chats
     .map((c) => user.role === "owner" ? String(c._id?.propertyId || "") : String(c._id || ""))
     .filter(Boolean);
@@ -2125,14 +2103,10 @@ connectDatabase()
     }
   })
   .catch((error) => {
-    // Log the error but do not exit the process in a serverless environment.
-    // Exiting the process causes Vercel to show a function crash (500). Instead,
-    // keep the function alive and respond with 503 for API routes until the DB is ready.
     DB_CONNECTED = false;
     console.error("Failed to connect to database:", error);
   });
 
-// Log unhandled errors to help debugging without crashing the process in serverless.
 process.on("unhandledRejection", (reason) => {
   console.error("Unhandled Rejection:", reason);
 });

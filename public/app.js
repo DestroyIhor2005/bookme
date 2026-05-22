@@ -165,11 +165,9 @@ function autoExpandTextarea(textarea) {
 
   const baseHeight = Number(textarea.dataset.baseHeight) || textarea.offsetHeight || 0;
   textarea.style.height = "auto";
-  // Grow the textarea with content up to a sensible maximum to avoid shifting the whole page
   textarea.style.height = Math.max(baseHeight, Math.min(textarea.scrollHeight, 360)) + "px";
 }
 
-// Auto-expand textarea
 [chatInput, dashboardChatInput, chatEditModalInput, contactMessage, document.getElementById("owner-property-description")].forEach((textarea) => {
   if (!textarea) {
     return;
@@ -188,7 +186,6 @@ function syncModalScrollLock() {
   document.body.classList.toggle("modal-open", hasVisibleModal);
 }
 
-// Custom confirm modal (returns Promise<boolean>)
 function showConfirm(text) {
   return new Promise((resolve) => {
     const modal = document.getElementById('confirm-modal');
@@ -197,7 +194,6 @@ function showConfirm(text) {
     const cancel = document.getElementById('confirm-cancel');
 
     if (!modal || !ok || !cancel || !txt) {
-      // fallback to window.confirm if modal not present
       resolve(window.confirm(text));
       return;
     }
@@ -287,7 +283,6 @@ const OWNER_PROPERTY_ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "
 const OWNER_PROPERTY_IMAGE_HINT = "PNG, JPG або WEBP до 3 МБ.";
 const OWNER_PROPERTY_MAX_IMAGES = 7;
 
-// Fixed guest buckets used by the filters (mutually exclusive ranges)
 const FIXED_GUEST_BUCKETS = [2, 4, 6];
 
 let ownerPropertyImages = [];
@@ -462,7 +457,6 @@ function createCustomSelect(select) {
 function initCustomSelects() {
   [filterCity, filterType, filterGuests, ownerPropertyTypeSelect].forEach((select) => {
     if (!select) return;
-    // Remove any existing custom-select wrapper to ensure it's rebuilt with current options
     const existing = select.parentElement.querySelector(`.custom-select[data-select-id="${select.id}"]`);
     if (existing) existing.remove();
     createCustomSelect(select);
@@ -562,17 +556,14 @@ function removeOwnerPropertyImage(imageIndex) {
 function extractImageSource(value) {
   if (!value) return "";
   let v = String(value).trim();
-  // if wrapped in url('...') or url("...") extract
   const urlMatch = v.match(/url\(['"]?(.*?)['"]?\)/i);
   if (urlMatch && urlMatch[1]) {
     v = urlMatch[1];
   }
-  // if contains data: inside a gradient, try to extract it
   const dataMatch = v.match(/(data:image\/[a-z]+;base64,[^'"\)\s]+)/i);
   if (dataMatch) {
     return dataMatch[1];
   }
-  // otherwise return plain url or data-uri
   return v;
 }
 
@@ -1597,7 +1588,6 @@ function populateFiltersFromProperties() {
     .filter((city) => !fallbackCities.includes(city))
     .sort((left, right) => left.localeCompare(right, "uk"));
   const cities = propertyCities.length ? [...orderedKnownCities, ...additionalCities] : [...fallbackCities];
-  // Use fixed guest buckets to match previous UX: До 2, До 4, До 6
   const fixedGuestBuckets = [2, 4, 6];
   const prices = properties
     .map((property) => Number(property.price))
@@ -1618,7 +1608,6 @@ function populateFiltersFromProperties() {
   });
 
   filterGuests.querySelectorAll('option:not([value="0"])').forEach((option) => option.remove());
-  // Build guest options as upper-bound buckets ("До X") and an extra "Від 6" bucket
   const guestBuckets = fixedGuestBuckets;
   guestBuckets.forEach((guestCount) => {
     const option = document.createElement("option");
@@ -1626,7 +1615,6 @@ function populateFiltersFromProperties() {
     option.textContent = `До ${guestCount}`;
     filterGuests.appendChild(option);
   });
-  // Add a 'from 6' option to show properties for larger groups (>= 6)
   if (![...filterGuests.options].some((o) => o.value === "gte_6")) {
     const option = document.createElement("option");
     option.value = "gte_6";
@@ -1699,11 +1687,9 @@ function applyFilters() {
       guestMatch = true;
     } else if (typeof guests === "string" && guests.startsWith("lte_")) {
       const n = Number(guests.split("_")[1] || 0);
-      // 'До N' now matches strictly equal to N (===) per user's request
       guestMatch = Number(property.guests) === n;
     } else if (typeof guests === "string" && guests.startsWith("gte_")) {
       const n = Number(guests.split("_")[1] || 0);
-      // 'Від N' should show properties that can host more than N people (strictly greater)
       guestMatch = Number(property.guests) > n;
     } else {
       guestMatch = Number(property.guests) >= Number(guests);
@@ -1733,13 +1719,11 @@ function resetFilters() {
     filterPriceValue.textContent = `${filterPrice.value} грн`;
   }
 
-  // Rebuild custom selects so the visual state reflects cleared values
   try {
     [filterCity, filterType, filterGuests].forEach((s) => {
       if (s) createCustomSelect(s);
     });
   } catch (e) {
-    // ignore
   }
 
   closeCustomSelects();
@@ -1849,9 +1833,7 @@ function renderDetails(propertyId, navigate = true) {
   selectedPropertyId = property.id;
   document.getElementById("details-title").textContent = property.title;
   document.getElementById("details-price").textContent = `${property.price} грн / доба`;
-  // Уникати дублювання міста в характеристиках житла
   let addressMeta = property.address || "";
-  // Якщо address вже містить місто, не дублювати
   if (addressMeta.trim().toLowerCase().startsWith(property.city.trim().toLowerCase())) {
     addressMeta = addressMeta;
   } else {
@@ -2197,7 +2179,6 @@ function openDashboardChatRoom() {
   activeChatView = "dashboard";
   dashboardChatsListCard.classList.add("hidden");
   dashboardChatRoomCard.classList.remove("hidden");
-  // Hide per-user selector and owner status in dashboard simplified view
   if (dashboardChatThreadWrap) {
     dashboardChatThreadWrap.classList.add("hidden");
   }
@@ -2255,8 +2236,7 @@ async function loadChatMessages() {
 
   const ui = getActiveChatUi();
   const { ownerStatusEl, threadWrapEl, threadSelectEl, chatBoxEl } = ui;
-  
-  // On dashboard, always hide the selector. In modal, show if owner.
+
   if (threadWrapEl) {
     if (activeChatView === "dashboard") {
       threadWrapEl.classList.add("hidden");
@@ -2265,7 +2245,6 @@ async function loadChatMessages() {
     }
   }
 
-  // For owner view, fetch threads first (without userId) so we always have the thread list.
   const query = currentUser?.role === "owner" ? "" : (selectedChatUserId ? `?userId=${encodeURIComponent(selectedChatUserId)}` : "");
   const payload = await apiRequest(`/api/chat/${encodeURIComponent(activeChatPropertyId)}${query}`);
   if (ownerStatusEl) {
@@ -2284,7 +2263,6 @@ async function loadChatMessages() {
       }
       if (threadSelectEl) {
         threadSelectEl.value = selectedChatUserId;
-        // On dashboard always hide, in modal hide only if 1 thread
         if (threadWrapEl) {
           if (activeChatView === "dashboard") {
             threadWrapEl.classList.add("hidden");
@@ -2471,7 +2449,6 @@ async function handleLogout() {
   try {
     await apiRequest("/api/auth/logout", { method: "POST" });
   } catch {
-    // Ignore server logout errors and still reset client state.
   }
 
   currentUser = null;
@@ -2864,7 +2841,6 @@ document.addEventListener("click", (event) => {
       return;
     }
     populateOwnerPropertyForm(property);
-    // Scroll to form for convenience
     setTimeout(() => {
       ownerPropertyForm.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 150);
@@ -2897,8 +2873,6 @@ document.addEventListener("click", (event) => {
     });
     return;
   }
-
-  // Reject flow removed: UI no longer exposes reject modal or handlers.
 
   const dashButton = event.target.closest("[data-dash-link]");
   if (dashButton) {
@@ -3090,7 +3064,6 @@ dashboardEditProfileButton.addEventListener("click", openProfileEditModal);
 document.getElementById("close-profile-edit-btn").addEventListener("click", closeProfileEditModal);
 document.getElementById("cancel-profile-edit-btn").addEventListener("click", closeProfileEditModal);
 
-// Open chats list
 if (openChatsBtn) {
   openChatsBtn.addEventListener("click", loadAndShowUserChats);
 }
@@ -3135,7 +3108,6 @@ function focusPropertyLinkForChat(titleElement, propertyId, canOpenProperty = tr
   }
 }
 
-// Click on chat to open it
 async function handleChatListClick(event) {
   const titleLink = event.target.closest(".chat-list-item__title, #dashboard-chat-room-title");
   if (titleLink?.dataset.propertyId) {
@@ -3231,7 +3203,6 @@ function submitChatMessage(event, ui = getActiveChatUi()) {
     method: "POST",
     body: JSON.stringify(payload)
   }).then(async () => {
-    // clear and reset heights for all chat inputs so a large message doesn't persist
     if (ui.chatInputEl) {
       ui.chatInputEl.value = "";
     }
@@ -3269,7 +3240,6 @@ async function editChatMessage(messageId, currentText = "") {
       body: JSON.stringify({ message: trimmed })
     });
     await loadChatMessages();
-    // reset heights after edit so inputs don't remain expanded
     [chatInput, dashboardChatInput, chatEditModalInput].forEach((ta) => {
       if (!ta) return;
       try {
@@ -3385,7 +3355,6 @@ chatForm.addEventListener("submit", async (event) => {
   });
 });
 
-// Delegated handler for delete buttons inside chat
 chatBox.addEventListener('click', async (e) => {
   const btn = e.target.closest('.chat-message__delete');
   if (!btn) return;
