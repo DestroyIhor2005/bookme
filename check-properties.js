@@ -2,7 +2,7 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 
 async function check() {
-  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/bookme';
+  const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/House_Booking';
   await mongoose.connect(uri);
 
   const propertiesCollection = mongoose.connection.db.collection('Properties');

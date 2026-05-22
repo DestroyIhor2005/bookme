@@ -5018,13 +5018,13 @@ const makeModel = (name, collection) =>
   mongoose.models[name] ??
   mongoose.model(name, new mongoose.Schema({}, { strict: false, collection }));
 
-const User        = makeModel('User',        'users');
-const Property    = makeModel('Property',    'properties');
-const Booking     = makeModel('Booking',     'bookings');
-const Payment     = makeModel('Payment',     'payments');
-const Promocode   = makeModel('Promocode',   'promocodes');
-const Notification= makeModel('Notification','notifications');
-const ChatMessage = makeModel('ChatMessage', 'chatmessages');
+const User        = makeModel('User',        'Users');
+const Property    = makeModel('Property',    'Properties');
+const Booking     = makeModel('Booking',     'Bookings');
+const Payment     = makeModel('Payment',     'Payments');
+const Promocode   = makeModel('Promocode',   'Promocodes');
+const Notification= makeModel('Notification','Notifications');
+const ChatMessage = makeModel('ChatMessage', 'ChatMessages');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -5046,7 +5046,7 @@ const upsertAll = async (Model, docs) => {
 // Entry point
 // ---------------------------------------------------------------------------
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/House_Booking?retryWrites=true&w=majority';
 
 if (!MONGODB_URI) {
   console.error('❌  Missing environment variable: MONGODB_URI');

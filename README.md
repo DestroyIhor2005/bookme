@@ -38,16 +38,22 @@ cd bookme
 
 2) Підготовка `.env`
 
-Відкрийте `.env` і переконайтесь, що там є такі змінні:
+Відкрийте `.env` і переконайтесь, що там є такі змінні (для Docker):
 
 ```
-MONGODB_URI=mongodb://mongo:27017/House_Booking
+MONGODB_URI=mongodb://mongo:27017/House_Booking?retryWrites=true&w=majority
 SESSION_SECRET=будь-який_довгий_секрет
 PORT=3000
 NODE_ENV=production
 ```
 
 Цей файл потрібен, щоб застосунок знав, куди підключатися до бази даних і який секрет використовувати для сесій.
+
+Для запуску без Docker на локальній машині використовуйте:
+
+```
+MONGODB_URI=mongodb://127.0.0.1:27017/House_Booking?retryWrites=true&w=majority
+```
 
 3) Запуск у Docker
 

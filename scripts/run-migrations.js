@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 
 const migrationsDir = path.join(process.cwd(), 'migrations');
 const migrationJournalName = '_migrations';
-const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/House_Booking';
+const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/House_Booking?retryWrites=true&w=majority';
 
 async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
